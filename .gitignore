@@ -1,0 +1,18 @@
+# Credentials
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Virtual environment
+.venv/
+
+# IDE
+.vscode/
+.idea/
+pyrightconfig.json
+
+# Claude Code session data
+.claude/
