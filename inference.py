@@ -14,7 +14,7 @@ Environment variables:
     API_BASE_URL   LLM endpoint (default: https://router.huggingface.co/v1)
     MODEL_NAME     Model identifier (default: Qwen/Qwen2.5-72B-Instruct)
     HF_TOKEN       HuggingFace / API key
-    IMAGE_NAME     Docker image name for the environment
+    LOCAL_IMAGE_NAME     Docker image name for the environment
 """
 
 import asyncio
@@ -35,10 +35,10 @@ load_dotenv()
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
-IMAGE_NAME = os.getenv("IMAGE_NAME", "soc2-auditor:latest")
-API_KEY = os.getenv("HF_TOKEN") or os.getenv("API_KEY")
+LOCAL_IMAGE_NAME = os.getenv("LOCAL_IMAGE_NAME")
 API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
+HF_TOKEN = os.getenv("HF_TOKEN")
 
 BENCHMARK = "soc2_auditor"
 TASK_NAME = "soc2_3tasks"
@@ -369,8 +369,8 @@ async def run_task(
 
 
 async def main() -> None:
-    client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
-    env = await SOC2Env.from_docker_image(IMAGE_NAME)
+    client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
+    env = await SOC2Env.from_docker_image(LOCAL_IMAGE_NAME)
 
     all_rewards: List[float] = []
     global_step = 0
