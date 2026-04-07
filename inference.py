@@ -305,6 +305,14 @@ def get_model_action(
     return parse_action(raw), raw
 
 
+def ping_llm(client: OpenAI) -> str:
+    response = client.chat.completions.create(
+        model=MODEL_NAME,
+        messages=[{"role": "user", "content": "Reply with just: OK"}],
+    )
+    return (response.choices[0].message.content or "").strip()
+
+
 async def run_task(
     env: SOC2Env,
     client: OpenAI,
@@ -380,6 +388,11 @@ async def main() -> None:
     log_start(task=TASK_NAME, env=BENCHMARK, model=MODEL_NAME)
 
     try:
+        try:
+            ping_llm(client)
+        except Exception as e:
+            print(f"[DEBUG] Startup LLM ping failed: {e}", flush=True)
+
         try:
             env = await SOC2Env.from_docker_image(LOCAL_IMAGE_NAME)
         except Exception as e:
