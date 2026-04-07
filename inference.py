@@ -13,6 +13,7 @@ STDOUT FORMAT (strictly enforced):
 Environment variables:
     API_BASE_URL      LLM proxy endpoint (injected by validator)
     API_KEY           API key for the LLM proxy (injected by validator)
+    ENV_BASE_URL      Environment server base URL (e.g., HF Space URL)
     MODEL_NAME        Model identifier (default: Qwen/Qwen2.5-72B-Instruct)
     LOCAL_IMAGE_NAME  Docker image name for the environment (default: soc2-auditor:latest)
 """
@@ -35,8 +36,8 @@ load_dotenv()
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
-LOCAL_IMAGE_NAME = os.getenv("LOCAL_IMAGE_NAME")
 API_BASE_URL = os.environ["API_BASE_URL"]
+ENV_BASE_URL = os.getenv("ENV_BASE_URL", "https://ksingh08-soc2-auditor.hf.space")
 MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4.1-mini")
 API_KEY = os.environ["API_KEY"]
 
@@ -389,11 +390,14 @@ async def main() -> None:
             print(f"[DEBUG] Startup LLM ping failed: {e}", flush=True)
 
         try:
-            env = await SOC2Env.from_docker_image(LOCAL_IMAGE_NAME)
+            env = SOC2Env(base_url=ENV_BASE_URL)
+            await env.connect()
         except Exception as e:
             print(f"[DEBUG] Environment startup failed: {e}", flush=True)
-            log_start(task=TASK_NAME, env=BENCHMARK, model=MODEL_NAME)
-            log_end(success=False, steps=0, score=0.001, rewards=[0.0])
+            for task_id in GRADED_TASK_IDS:
+                log_start(task=task_id, env=BENCHMARK, model=MODEL_NAME)
+                log_step(step=1, action="SUBMIT_DECISION('REJECT', 'NONE')", reward=0.001, done=True, error=str(e))
+                log_end(success=False, steps=1, score=0.001, rewards=[0.001])
             return
 
         for task_id in GRADED_TASK_IDS:
