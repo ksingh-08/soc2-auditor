@@ -38,7 +38,7 @@ load_dotenv()
 LOCAL_IMAGE_NAME = os.getenv("LOCAL_IMAGE_NAME")
 API_BASE_URL = os.environ["API_BASE_URL"]
 MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
-HF_TOKEN = os.getenv("HF_TOKEN")
+API_KEY = os.environ["API_KEY"]
 
 BENCHMARK = "soc2_auditor"
 TASK_NAME = "soc2_3tasks"
@@ -369,7 +369,7 @@ async def run_task(
 
 
 async def main() -> None:
-    client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
+    client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
     env = None
 
     all_rewards: List[float] = []
