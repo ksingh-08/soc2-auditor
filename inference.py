@@ -370,7 +370,7 @@ async def run_task(
 
 async def main() -> None:
     client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
-    env = await SOC2Env.from_docker_image(LOCAL_IMAGE_NAME)
+    env = None
 
     all_rewards: List[float] = []
     global_step = 0
@@ -380,6 +380,12 @@ async def main() -> None:
     log_start(task=TASK_NAME, env=BENCHMARK, model=MODEL_NAME)
 
     try:
+        try:
+            env = await SOC2Env.from_docker_image(LOCAL_IMAGE_NAME)
+        except Exception as e:
+            print(f"[DEBUG] Environment startup failed: {e}", flush=True)
+            return
+
         for task_id in GRADED_TASK_IDS:
             print(f"[DEBUG] Starting task: {task_id}", flush=True)
             try:
@@ -396,7 +402,8 @@ async def main() -> None:
         score = min(max(score, 0.0), 1.0)
         success = score >= SUCCESS_SCORE_THRESHOLD
         try:
-            await env.close()
+            if env is not None:
+                await env.close()
         except Exception as e:
             print(f"[DEBUG] env.close() error: {e}", flush=True)
         log_end(success=success, steps=global_step, score=score, rewards=all_rewards)
