@@ -380,12 +380,7 @@ async def main() -> None:
     client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
     env = None
 
-    all_rewards: List[float] = []
     global_step = 0
-    score = 0.0
-    success = False
-
-    log_start(task=TASK_NAME, env=BENCHMARK, model=MODEL_NAME)
 
     try:
         try:
@@ -401,25 +396,29 @@ async def main() -> None:
 
         for task_id in GRADED_TASK_IDS:
             print(f"[DEBUG] Starting task: {task_id}", flush=True)
+            log_start(task=task_id, env=BENCHMARK, model=MODEL_NAME)
+            step_before = global_step
+            task_rewards: List[float] = []
             try:
                 task_rewards, global_step = await run_task(env, client, task_id, global_step)
-                all_rewards.extend(task_rewards)
-                task_score = sum(task_rewards)
-                print(f"[DEBUG] Task {task_id} raw reward: {task_score:.3f}", flush=True)
             except Exception as e:
                 print(f"[DEBUG] Task {task_id} failed: {e}", flush=True)
-                all_rewards.append(0.0)
+                task_rewards = [0.0]
+                global_step += 1
+
+            raw_score = sum(task_rewards) / 1.0  # max reward per task = 1.0
+            task_score = max(0.001, min(0.999, raw_score))
+            task_steps = global_step - step_before
+            task_success = task_score >= SUCCESS_SCORE_THRESHOLD
+            print(f"[DEBUG] Task {task_id} raw reward: {raw_score:.3f} score: {task_score:.3f}", flush=True)
+            log_end(success=task_success, steps=task_steps, score=task_score, rewards=task_rewards)
 
     finally:
-        score = sum(all_rewards) / MAX_TOTAL_REWARD if MAX_TOTAL_REWARD > 0 else 0.0
-        score = min(max(score, 0.0), 1.0)
-        success = score >= SUCCESS_SCORE_THRESHOLD
         try:
             if env is not None:
                 await env.close()
         except Exception as e:
             print(f"[DEBUG] env.close() error: {e}", flush=True)
-        log_end(success=success, steps=global_step, score=score, rewards=all_rewards)
 
 
 if __name__ == "__main__":
