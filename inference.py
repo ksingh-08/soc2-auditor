@@ -392,6 +392,8 @@ async def main() -> None:
             env = await SOC2Env.from_docker_image(LOCAL_IMAGE_NAME)
         except Exception as e:
             print(f"[DEBUG] Environment startup failed: {e}", flush=True)
+            log_start(task=TASK_NAME, env=BENCHMARK, model=MODEL_NAME)
+            log_end(success=False, steps=0, score=0.001, rewards=[0.0])
             return
 
         for task_id in GRADED_TASK_IDS:
