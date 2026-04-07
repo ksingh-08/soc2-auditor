@@ -213,7 +213,7 @@ docker run -p 8000:8000 soc2-auditor:latest
 
 ```bash
 # Set environment variables
-export HF_TOKEN=your_token_here
+export API_KEY=your_token_here
 export API_BASE_URL=https://router.huggingface.co/v1
 export MODEL_NAME=Qwen/Qwen2.5-72B-Instruct
 export IMAGE_NAME=soc2-auditor:latest
@@ -225,7 +225,7 @@ uv run python inference.py
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `HF_TOKEN` | Yes | — | HuggingFace API token |
+| `API_KEY` | Yes | — | HuggingFace API token |
 | `API_BASE_URL` | No | `https://router.huggingface.co/v1` | LLM endpoint |
 | `MODEL_NAME` | No | `Qwen/Qwen2.5-72B-Instruct` | Model identifier |
 | `IMAGE_NAME` | No | `soc2-auditor:latest` | Docker image name |

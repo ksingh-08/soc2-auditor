@@ -11,10 +11,10 @@ STDOUT FORMAT (strictly enforced):
     [END]   success=<true|false> steps=<n> score=<0.000> rewards=<r1,r2,...>
 
 Environment variables:
-    API_BASE_URL   LLM endpoint (default: https://router.huggingface.co/v1)
-    MODEL_NAME     Model identifier (default: Qwen/Qwen2.5-72B-Instruct)
-    HF_TOKEN       HuggingFace / API key
-    LOCAL_IMAGE_NAME     Docker image name for the environment
+    API_BASE_URL      LLM proxy endpoint (injected by validator)
+    API_KEY           API key for the LLM proxy (injected by validator)
+    MODEL_NAME        Model identifier (default: Qwen/Qwen2.5-72B-Instruct)
+    LOCAL_IMAGE_NAME  Docker image name for the environment (default: soc2-auditor:latest)
 """
 
 import asyncio
@@ -37,7 +37,7 @@ load_dotenv()
 # ---------------------------------------------------------------------------
 LOCAL_IMAGE_NAME = os.getenv("LOCAL_IMAGE_NAME")
 API_BASE_URL = os.environ["API_BASE_URL"]
-MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
+MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4.1-mini")
 API_KEY = os.environ["API_KEY"]
 
 BENCHMARK = "soc2_auditor"
